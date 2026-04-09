@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>明砉背单词</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+body {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    padding: 15px;
+}
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 20px 15px;
+}
+h1 {
+    color: #2d3748;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+#word-input {
+    width: 100%;
+    height: 180px;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 16px;
+    line-height: 1.5;
+    resize: vertical;
+    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 10px;
+}
+button {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+    margin: 5px;
+}
+.btn-blue {
+    background-color: #4299e1;
+    color: white;
+}
+.btn-green {
+    background-color: #48bb78;
+    color: white;
+}
+.btn-orange {
+    background-color: #ed8936;
+    color: white;
+}
+.word-card {
+    background-color: #f7fafc;
+    border-radius: 12px;
+    padding: 30px 15px;
+    margin: 20px 0;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #2d3748;
+}
+.answer-card {
+    background-color: #f0fff4;
+    border-radius: 12px;
+    padding: 25px 15px;
+    text-align: center;
+    font-size: 24px;
+    color: #2f855a;
+    display: none;
+    margin-bottom: 20px;
+}
+.tip {
+    text-align: center;
+    color: #718096;
+    font-size: 14px;
+    margin-top: 10px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>明砉背单词</h1>
+    <textarea id="word-input" placeholder="请输入：英文 中文，每行一个（支持带词性，自动识别）"></textarea>
+    <button class="btn-blue" onclick="importWords()">一键导入单词</button>
+    <div class="word-card" id="current-word">请先导入单词</div>
+    <button class="btn-green" onclick="nextWord()">随机出英文</button>
+    <button class="btn-orange" onclick="showAnswer()">显示中文答案</button>
+    <div class="answer-card" id="answer"></div>
+    <p class="tip">💡 导入后可无限刷题，手机/电脑/微信都能用</p >
+</div>
+
+<script>
+let wordList = [];
+let currentWord = null;
+
+function importWords() {
+    const input = document.getElementById('word-input').value.trim();
+    if (!input) {
+        alert('❌ 请先粘贴单词内容！');
+        return;
+    }
+    // 智能解析：跳过序号、词性，提取英文+中文
+    wordList = input.split('\n').map(line => {
+        const cleanLine = line.replace(/^\d+\./, '').trim();
+        const parts = cleanLine.split(/\s+/);
+        const en = parts.shift();
+        // 跳过词性（adj./v./n.等）
+        const zhParts = parts.filter(p => !/^[a-z\.\/]+$/i.test(p));
+        return {
+            en: en,
+            zh: zhParts.join(' ')
+        };
+    }).filter(item => item.en && item.zh);
+    alert(`✅ 成功导入 ${wordList.length} 个单词！`);
+}
+
+function nextWord() {
+    if (wordList.length === 0) {
+        alert('⚠️ 请先导入单词！');
+        return;
+    }
+    // 随机取一个单词，避免连续重复
+    let randomIndex;
+    do {
+        randomIndex = Math.floor(Math.random() * wordList.length);
+    } while (currentWord && randomIndex === wordList.indexOf(currentWord));
+    currentWord = wordList[randomIndex];
+    document.getElementById('current-word').textContent = currentWord.en;
+    document.getElementById('answer').style.display = 'none';
+}
+
+function showAnswer() {
+    if (!currentWord) return;
+    document.getElementById('answer').textContent = currentWord.zh;
+    document.getElementById('answer').style.display = 'block';
+}
+</script>
+</body>
+</html>
